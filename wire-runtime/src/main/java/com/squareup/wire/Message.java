@@ -17,284 +17,173 @@ package com.squareup.wire;
 
 import java.io.IOException;
 import java.io.ObjectStreamException;
+import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import javax.annotation.Nullable;
+import okio.Buffer;
+import okio.BufferedSink;
 import okio.ByteString;
 
-/**
- * Superclass for protocol buffer messages.
- */
-public abstract class Message implements Serializable {
+/** A protocol buffer message. */
+public abstract class Message<M extends Message<M, B>, B extends Message.Builder<M, B>>
+    implements Serializable {
   private static final long serialVersionUID = 0L;
 
-  // Hidden Wire instance that can perform work that does not require knowledge of extensions.
-  static final Wire WIRE = new Wire();
+  private final transient ProtoAdapter<M> adapter;
 
-  /**
-   * A protocol buffer data type.
-   */
-  public enum Datatype {
-    INT32(1), INT64(2), UINT32(3), UINT64(4), SINT32(5),
-    SINT64(6), BOOL(7), ENUM(8), STRING(9), BYTES(10),
-    MESSAGE(11), FIXED32(12), SFIXED32(13), FIXED64(14),
-    SFIXED64(15), FLOAT(16), DOUBLE(17);
+  /** Unknown fields, proto-encoded. We permit null to support magic deserialization. */
+  private final transient ByteString unknownFields;
 
-    private final int value;
-
-    Datatype(int value) {
-      this.value = value;
-    }
-
-    public int value() {
-      return value;
-    }
-
-    WireType wireType() {
-      switch (this) {
-        case INT32: case INT64: case UINT32: case UINT64:
-        case SINT32: case SINT64: case BOOL: case ENUM:
-          return WireType.VARINT;
-        case FIXED32: case SFIXED32: case FLOAT:
-          return WireType.FIXED32;
-        case FIXED64: case SFIXED64: case DOUBLE:
-          return WireType.FIXED64;
-        case STRING: case BYTES: case MESSAGE:
-          return WireType.LENGTH_DELIMITED;
-        default:
-          throw new AssertionError("No wiretype for datatype " + this);
-      }
-    }
-  }
-
-  /**
-   * A protocol buffer label. We treat "packed" as a label of its own that implies "repeated."
-   */
-  public enum Label {
-    REQUIRED(32), OPTIONAL(64), REPEATED(128), PACKED(256), ONE_OF(512);
-
-    private final int value;
-
-    Label(int value) {
-      this.value = value;
-    }
-
-    public int value() {
-      return value;
-    }
-
-    boolean isRepeated() {
-      return this == REPEATED || this == PACKED;
-    }
-
-    boolean isPacked() {
-      return this == PACKED;
-    }
-
-    boolean isOneOf() {
-      return this == ONE_OF;
-    }
-  }
-
-  /** Set to null until a field is added. */
-  private transient UnknownFieldMap unknownFields;
-
-  /** If not {@code -1} then the serialized size of this message. */
-  transient int cachedSerializedSize = -1;
+  /** If not {@code 0} then the serialized size of this message. */
+  transient int cachedSerializedSize = 0;
 
   /** If non-zero, the hash code of this message. Accessed by generated code. */
   protected transient int hashCode = 0;
 
-  protected Message() {
+  protected Message(ProtoAdapter<M> adapter, ByteString unknownFields) {
+    if (adapter == null) throw new NullPointerException("adapter == null");
+    if (unknownFields == null) throw new NullPointerException("unknownFields == null");
+    this.adapter = adapter;
+    this.unknownFields = unknownFields;
   }
 
   /**
-   * Initializes any unknown field data to that stored in the given {@code Builder}.
+   * Returns a byte string containing the proto encoding of this message's unknown fields. Returns
+   * an empty byte string if this message has no unknown fields.
    */
-  protected void setBuilder(Builder builder) {
-    if (builder.unknownFieldMap != null) {
-      unknownFields = new UnknownFieldMap(builder.unknownFieldMap);
-    }
-  }
-
-  // Increase visibility for testing
-  protected Collection<List<UnknownFieldMap.FieldValue>> unknownFields() {
-    return unknownFields == null ? Collections.<List<UnknownFieldMap.FieldValue>>emptySet()
-        : unknownFields.fieldMap.values();
+  public final ByteString unknownFields() {
+    ByteString result = this.unknownFields;
+    return result != null ? result : ByteString.EMPTY;
   }
 
   /**
-   * Utility method to return a mutable copy of a given List. Used by generated code.
+   * Returns a new builder initialized with the data in this message.
    */
-  protected static <T> List<T> copyOf(List<T> source) {
-    return source == null ? null : new ArrayList<T>(source);
+  public abstract B newBuilder();
+
+  /** Returns this message with any unknown fields removed. */
+  public final M withoutUnknownFields() {
+    return newBuilder().clearUnknownFields().build();
   }
 
-  /**
-   * Utility method to return an immutable copy of a given List. Used by generated code.
-   * If {@code source} is null, {@link Collections#emptyList()} is returned.
-   */
-  protected static <T> List<T> immutableCopyOf(List<T> source) {
-    if (source == null) {
-      return Collections.emptyList();
-    } else if (source instanceof MessageAdapter.ImmutableList) {
-      return source;
-    }
-    return Collections.unmodifiableList(new ArrayList<T>(source));
-  }
-
-  /**
-   * Returns the enumerated value tagged with the given integer value for the
-   * given enum class. If no enum value in the given class is initialized
-   * with the given integer tag value, an exception will be thrown.
-   *
-   * @param <E> the enum class type
-   */
-  public static <E extends Enum & ProtoEnum> E enumFromInt(Class<E> enumClass, int value) {
-    EnumAdapter<E> adapter = WIRE.enumAdapter(enumClass);
-    return adapter.fromInt(value);
-  }
-
-  void writeUnknownFieldMap(WireOutput output) throws IOException {
-    if (unknownFields != null) {
-      unknownFields.write(output);
-    }
-  }
-
-  int getUnknownFieldsSerializedSize() {
-    return unknownFields == null ? 0 : unknownFields.getSerializedSize();
-  }
-
-  protected static boolean equals(Object a, Object b) {
-    return a == b || (a != null && a.equals(b));
-  }
-
-  @SuppressWarnings("unchecked")
   @Override public String toString() {
-    return WIRE.messageAdapter((Class<Message>) getClass()).toString(this);
+    //noinspection unchecked
+    return adapter.toString((M) this);
   }
 
-  private Object writeReplace() throws ObjectStreamException {
-    return new MessageSerializedForm(this, getClass());
+  protected final Object writeReplace() throws ObjectStreamException {
+    //noinspection unchecked
+    return new MessageSerializedForm(encode(), getClass());
+  }
+
+  /** The {@link ProtoAdapter} for encoding and decoding messages of this type. */
+  public final ProtoAdapter<M> adapter() {
+    return adapter;
+  }
+
+  /** Encode this message and write it to {@code stream}. */
+  public final void encode(BufferedSink sink) throws IOException {
+    //noinspection unchecked
+    adapter.encode(sink, (M) this);
+  }
+
+  /** Encode this message as a {@code byte[]}. */
+  public final byte[] encode() {
+    //noinspection unchecked
+    return adapter.encode((M) this);
+  }
+
+  /** Encode this message and write it to {@code stream}. */
+  public final void encode(OutputStream stream) throws IOException {
+    //noinspection unchecked
+    adapter.encode(stream, (M) this);
   }
 
   /**
    * Superclass for protocol buffer message builders.
    */
-  public abstract static class Builder<T extends Message> {
-
-    UnknownFieldMap unknownFieldMap;
-
+  public abstract static class Builder<M extends Message<M, B>, B extends Builder<M, B>> {
     /**
-     * Constructs a Builder with no unknown field data.
+     * Caches unknown fields as a {@link ByteString} when {@link #buildUnknownFields()} is called.
+     * When the caller adds an additional unknown field after that, it will be written to the new
+     * {@link #unknownFieldsBuffer} to ensure that all unknown fields are retained between calls to
+     * {@link #buildUnknownFields()}.
      */
-    public Builder() {
+    transient ByteString unknownFieldsByteString = ByteString.EMPTY;
+    /**
+     * {@link Buffer} of the message's unknown fields that is lazily instantiated between calls to
+     * {@link #buildUnknownFields()}. It's automatically cleared in {@link #buildUnknownFields()},
+     * and can also be manually cleared by calling {@link #clearUnknownFields()}.
+     */
+    transient @Nullable Buffer unknownFieldsBuffer;
+    transient ProtoWriter unknownFieldsWriter;
+
+    protected Builder() {
     }
 
-    /**
-     * Constructs a Builder with unknown field data initialized to a copy of any unknown
-     * field data in the given {@link Message}.
-     */
-    public Builder(Message message) {
-      if (message != null && message.unknownFields != null) {
-        this.unknownFieldMap = new UnknownFieldMap(message.unknownFields);
-      }
-    }
-
-    /**
-     * Adds a {@code varint} value to the unknown field set with the given tag number.
-     */
-    public void addVarint(int tag, long value) {
-      try {
-        ensureUnknownFieldMap().addVarint(tag, value);
-      } catch (IOException e) {
-        throw new IllegalArgumentException(e.getMessage());
-      }
-    }
-
-    /**
-     * Adds a {@code fixed32} value to the unknown field set with the given tag number.
-     */
-    public void addFixed32(int tag, int value) {
-      try {
-        ensureUnknownFieldMap().addFixed32(tag, value);
-      } catch (IOException e) {
-        throw new IllegalArgumentException(e.getMessage());
-      }
-    }
-
-    /**
-     * Adds a {@code fixed64} value to the unknown field set with the given tag number.
-     */
-    public void addFixed64(int tag, long value) {
-      try {
-        ensureUnknownFieldMap().addFixed64(tag, value);
-      } catch (IOException e) {
-        throw new IllegalArgumentException(e.getMessage());
-      }
-    }
-
-    /**
-     * Adds a length delimited value to the unknown field set with the given tag number.
-     */
-    public void addLengthDelimited(int tag, ByteString value) {
-      try {
-        ensureUnknownFieldMap().addLengthDelimited(tag, value);
-      } catch (IOException e) {
-        throw new IllegalArgumentException(e.getMessage());
-      }
-    }
-
-    UnknownFieldMap ensureUnknownFieldMap() {
-      if (unknownFieldMap == null) {
-        unknownFieldMap = new UnknownFieldMap();
-      }
-      return unknownFieldMap;
-    }
-
-    /**
-     * Create an exception for missing required fields.
-     *
-     * @param args Alternating field value and field name pairs.
-     */
-    protected IllegalStateException missingRequiredFields(Object... args) {
-      StringBuilder sb = new StringBuilder();
-      String plural = "";
-      for (int i = 0, size = args.length; i < size; i += 2) {
-        if (args[i] == null) {
-          if (sb.length() > 0) {
-            plural = "s"; // Found more than one missing field
-          }
-          sb.append("\n  ");
-          sb.append(args[i + 1]);
+    public final Builder<M, B> addUnknownFields(ByteString unknownFields) {
+      if (unknownFields.size() > 0) {
+        prepareForNewUnknownFields();
+        try {
+          unknownFieldsWriter.writeBytes(unknownFields);
+        } catch (IOException e) {
+          throw new AssertionError();
         }
       }
-      throw new IllegalStateException("Required field" + plural + " not set:" + sb);
+      return this;
+    }
+
+    public final Builder<M, B> addUnknownField(
+        int tag, FieldEncoding fieldEncoding, @Nullable Object value) {
+      prepareForNewUnknownFields();
+      try {
+        ProtoAdapter<Object> protoAdapter = (ProtoAdapter<Object>) fieldEncoding.rawProtoAdapter();
+        protoAdapter.encodeWithTag(unknownFieldsWriter, tag, value);
+      } catch (IOException e) {
+        throw new AssertionError();
+      }
+      return this;
+    }
+
+    public final Builder<M, B> clearUnknownFields() {
+      unknownFieldsByteString = ByteString.EMPTY;
+      if (unknownFieldsBuffer != null) {
+        unknownFieldsBuffer.clear();
+        unknownFieldsBuffer = null;
+      }
+      unknownFieldsWriter = null;
+      return this;
     }
 
     /**
-     * If {@code list} is null it will be replaced with {@link Collections#emptyList()}.
-     * Otherwise look for null items and throw {@link NullPointerException} if one is found.
+     * Returns a byte string with this message's unknown fields. Returns an empty byte string if
+     * this message has no unknown fields.
      */
-    protected static <T> List<T> canonicalizeList(List<T> list) {
-      if (list == null) {
-        return Collections.emptyList();
+    public final ByteString buildUnknownFields() {
+      if (unknownFieldsBuffer != null) {
+        // Reads and caches the unknown fields from the buffer.
+        unknownFieldsByteString = unknownFieldsBuffer.readByteString();
+        unknownFieldsBuffer = null;
+        unknownFieldsWriter = null;
       }
-      for (int i = 0, size = list.size(); i < size; i++) {
-        T element = list.get(i);
-        if (element == null) {
-          throw new NullPointerException("Element at index " + i + " is null");
+      return unknownFieldsByteString;
+    }
+
+    /** Returns an immutable {@link Message} based on the fields that set in this builder. */
+    public abstract M build();
+
+    private void prepareForNewUnknownFields() {
+      if (unknownFieldsBuffer == null) {
+        unknownFieldsBuffer = new Buffer();
+        unknownFieldsWriter = new ProtoWriter(unknownFieldsBuffer);
+        try {
+          // Writes the cached unknown fields to the buffer.
+          unknownFieldsWriter.writeBytes(unknownFieldsByteString);
+        } catch (IOException e) {
+          throw new AssertionError();
         }
+        unknownFieldsByteString = ByteString.EMPTY;
       }
-      return list;
     }
-
-    /**
-     * Returns an immutable {@link com.squareup.wire.Message} based on the fields that have been set
-     * in this builder.
-     */
-    public abstract T build();
   }
 }

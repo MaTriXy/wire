@@ -19,8 +19,8 @@ import com.squareup.wire.protos.oneof.OneOfMessage;
 import java.io.IOException;
 import org.junit.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.fail;
 
 public class OneOfTest {
 
@@ -30,11 +30,9 @@ public class OneOfTest {
   // (Tag #3 << 3 | LENGTH_DELIMITED) = 26, string length = 6.
   private static final byte[] BAR_BYTES = { 26, 6, 'b', 'a', 'r', 'b', 'a', 'r'};
 
-  private final Wire wire = new Wire();
-  private final MessageAdapter<OneOfMessage> adapter = wire.adapter(OneOfMessage.class);
+  private final ProtoAdapter<OneOfMessage> adapter = OneOfMessage.ADAPTER;
 
-  @Test
-  public void testOneOf() throws Exception {
+  @Test public void testOneOf() throws Exception {
     OneOfMessage.Builder builder = new OneOfMessage.Builder();
     validate(builder, null, null, INITIAL_BYTES);
 
@@ -57,24 +55,45 @@ public class OneOfTest {
     validate(builder, null, null, INITIAL_BYTES);
   }
 
+  @Test public void buildFailsWhenBothFieldsAreNonNull() throws Exception {
+    OneOfMessage.Builder builder = new OneOfMessage.Builder();
+    builder.foo = 1;
+    builder.bar = "two";
+    try {
+      builder.build();
+      fail();
+    } catch (IllegalArgumentException expected) {
+      assertThat(expected).hasMessage("at most one of foo, bar, baz may be non-null");
+    }
+  }
+
+  @Test public void constructorFailsWhenBothFieldsAreNonNull() throws Exception {
+    try {
+      new OneOfMessage(1, "two", null);
+      fail();
+    } catch (IllegalArgumentException expected) {
+      assertThat(expected).hasMessage("at most one of foo, bar, baz may be non-null");
+    }
+  }
+
   private void validate(OneOfMessage.Builder builder, Integer expectedFoo, String expectedBar,
       byte[] expectedBytes) throws IOException {
     // Check builder fields
-    assertEquals(expectedFoo, builder.foo);
-    assertEquals(expectedBar, builder.bar);
+    assertThat(builder.foo).isEqualTo(expectedFoo);
+    assertThat(builder.bar).isEqualTo(expectedBar);
 
     // Check message fields.
     OneOfMessage message = builder.build();
-    assertEquals(expectedFoo, message.foo);
-    assertEquals(expectedBar, message.bar);
+    assertThat(message.foo).isEqualTo(expectedFoo);
+    assertThat(message.bar).isEqualTo(expectedBar);
 
     // Check serialized bytes.
-    byte[] bytes = adapter.writeBytes(message);
-    assertArrayEquals(expectedBytes, bytes);
+    byte[] bytes = adapter.encode(message);
+    assertThat(expectedBytes).isEqualTo(bytes);
 
     // Check result of deserialization.
-    OneOfMessage newMessage = adapter.readBytes(bytes);
-    assertEquals(expectedFoo, newMessage.foo);
-    assertEquals(expectedBar, newMessage.bar);
+    OneOfMessage newMessage = adapter.decode(bytes);
+    assertThat(newMessage.foo).isEqualTo(expectedFoo);
+    assertThat(newMessage.bar).isEqualTo(expectedBar);
   }
 }

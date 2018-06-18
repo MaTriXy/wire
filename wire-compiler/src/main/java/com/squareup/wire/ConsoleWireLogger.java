@@ -16,28 +16,28 @@
 package com.squareup.wire;
 
 import com.squareup.javapoet.JavaFile;
-import java.io.File;
+import java.nio.file.Path;
 
 final class ConsoleWireLogger implements WireLogger {
-  private final boolean isQuiet;
+  private boolean quiet;
 
-  public ConsoleWireLogger(boolean quiet) {
-    this.isQuiet = quiet;
+  @Override public void setQuiet(boolean quiet) {
+    this.quiet = quiet;
   }
 
   public void info(String message) {
-    if (!isQuiet) {
+    if (!quiet) {
       System.out.println(message);
     }
   }
 
-  public void artifact(File outputDirectory, JavaFile javaFile) {
-    if (isQuiet) {
+  @Override public void artifact(Path outputPath, JavaFile javaFile) {
+    if (quiet) {
       System.out.printf("%s.%s%n",
           javaFile.packageName, javaFile.typeSpec.name);
     } else {
       System.out.printf("Writing %s.%s to %s%n",
-          javaFile.packageName, javaFile.typeSpec.name, outputDirectory);
+          javaFile.packageName, javaFile.typeSpec.name, outputPath);
     }
   }
 }

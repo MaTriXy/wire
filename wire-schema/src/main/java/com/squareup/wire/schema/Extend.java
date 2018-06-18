@@ -16,36 +16,55 @@
 package com.squareup.wire.schema;
 
 import com.google.common.collect.ImmutableList;
-import com.squareup.protoparser.ExtendElement;
-import com.squareup.protoparser.FieldElement;
+import com.squareup.wire.schema.internal.parser.ExtendElement;
 
-public final class Extend {
-  private final String packageName;
-  private final ExtendElement element;
+final class Extend {
+  private final Location location;
+  private final String documentation;
+  private final String name;
   private final ImmutableList<Field> fields;
-  private Type.Name name;
+  private ProtoType protoType;
 
-  Extend(String packageName, ExtendElement element) {
-    this.packageName = packageName;
-    this.element = element;
+  private Extend(Location location, String documentation, String name,
+      ImmutableList<Field> fields) {
+    this.location = location;
+    this.documentation = documentation;
+    this.name = name;
+    this.fields = fields;
+  }
 
-    ImmutableList.Builder<Field> fields = ImmutableList.builder();
-    for (FieldElement field : element.fields()) {
-      fields.add(new Field(packageName, field));
+  static ImmutableList<Extend> fromElements(String packageName,
+      ImmutableList<ExtendElement> extendElements) {
+    ImmutableList.Builder<Extend> extendBuilder = new ImmutableList.Builder<>();
+    for (ExtendElement extendElement : extendElements) {
+      extendBuilder.add(new Extend(extendElement.location(), extendElement.documentation(),
+          extendElement.name(), Field.fromElements(packageName, extendElement.fields(), true)));
     }
-    this.fields = fields.build();
+    return extendBuilder.build();
   }
 
-  public String packageName() {
-    return packageName;
+  static ImmutableList<ExtendElement> toElements(ImmutableList<Extend> extendList) {
+    ImmutableList.Builder<ExtendElement> elements = new ImmutableList.Builder<>();
+    for (Extend extend : extendList) {
+      elements.add(ExtendElement.builder(extend.location)
+          .documentation(extend.documentation)
+          .name(extend.name)
+          .fields(Field.toElements(extend.fields))
+          .build());
+    }
+    return elements.build();
   }
 
-  public Type.Name type() {
-    return name;
+  public Location location() {
+    return location;
+  }
+
+  public ProtoType type() {
+    return protoType;
   }
 
   public String documentation() {
-    return element.documentation();
+    return documentation;
   }
 
   public ImmutableList<Field> fields() {
@@ -53,9 +72,16 @@ public final class Extend {
   }
 
   void link(Linker linker) {
-    for (Field field : fields) {
-      field.link(linker);
+    linker = linker.withContext(this);
+    protoType = linker.resolveMessageType(name);
+    Type type = linker.get(protoType);
+    if (type != null) {
+      ((MessageType) type).addExtensionFields(fields);
     }
-    name = linker.resolveNamedType(packageName, element.name());
+  }
+
+  void validate(Linker linker) {
+    linker = linker.withContext(this);
+    linker.validateImport(location(), type());
   }
 }

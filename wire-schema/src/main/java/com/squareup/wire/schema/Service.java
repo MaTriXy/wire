@@ -16,42 +16,48 @@
 package com.squareup.wire.schema;
 
 import com.google.common.collect.ImmutableList;
-import com.squareup.protoparser.RpcElement;
-import com.squareup.protoparser.ServiceElement;
-import java.util.Set;
+import com.squareup.wire.schema.internal.parser.ServiceElement;
 
 public final class Service {
-  private final Type.Name name;
-  private final ServiceElement element;
+  private final ProtoType protoType;
+  private final Location location;
+  private final String name;
+  private final String documentation;
   private final ImmutableList<Rpc> rpcs;
   private final Options options;
 
-  private Service(Type.Name name, ServiceElement element,
+  private Service(ProtoType protoType, Location location, String documentation, String name,
       ImmutableList<Rpc> rpcs, Options options) {
+    this.protoType = protoType;
+    this.location = location;
+    this.documentation = documentation;
     this.name = name;
-    this.element = element;
     this.rpcs = rpcs;
     this.options = options;
   }
 
-  public static Service get(Type.Name name, ServiceElement element) {
-    ImmutableList.Builder<Rpc> rpcs = ImmutableList.builder();
-    for (RpcElement rpc : element.rpcs()) {
-      rpcs.add(new Rpc(name.packageName(), rpc));
-    }
+  static Service fromElement(ProtoType protoType, ServiceElement element) {
+    ImmutableList<Rpc> rpcs = Rpc.fromElements(element.rpcs());
+    Options options = new Options(Options.SERVICE_OPTIONS, element.options());
 
-    Options options = new Options(
-        Type.Name.SERVICE_OPTIONS, name.packageName(), element.options());
-
-    return new Service(name, element, rpcs.build(), options);
+    return new Service(protoType, element.location(), element.documentation(), element.name(), rpcs,
+        options);
   }
 
-  public Type.Name name() {
-    return name;
+  public Location location() {
+    return location;
+  }
+
+  public ProtoType type() {
+    return protoType;
   }
 
   public String documentation() {
-    return element.documentation();
+    return documentation;
+  }
+
+  public String name() {
+    return name;
   }
 
   public ImmutableList<Rpc> rpcs() {
@@ -73,38 +79,65 @@ public final class Service {
   }
 
   void link(Linker linker) {
+    linker = linker.withContext(this);
     for (Rpc rpc : rpcs) {
       rpc.link(linker);
     }
   }
 
   void linkOptions(Linker linker) {
+    linker = linker.withContext(this);
     for (Rpc rpc : rpcs) {
       rpc.linkOptions(linker);
     }
     options.link(linker);
   }
 
-  Service retainAll(Set<String> identifiers) {
-    String serviceName = name.toString();
-    if (identifiers.contains(serviceName)) {
-      return this; // Fully retained.
+  void validate(Linker linker) {
+    linker = linker.withContext(this);
+    for (Rpc rpc : rpcs) {
+      rpc.validate(linker);
+    }
+  }
+
+  Service retainAll(Schema schema, MarkSet markSet) {
+    // If this service is not retained, prune it.
+    if (!markSet.contains(protoType)) {
+      return null;
     }
 
-    ImmutableList.Builder<Rpc> retainedRpcsBuilde = ImmutableList.builder();
+    ImmutableList.Builder<Rpc> retainedRpcs = ImmutableList.builder();
     for (Rpc rpc : rpcs) {
-      if (identifiers.contains(serviceName + '#' + rpc.name())) {
-        retainedRpcsBuilde.add(rpc);
+      Rpc retainedRpc = rpc.retainAll(schema, markSet);
+      if (retainedRpc != null && markSet.contains(ProtoMember.get(protoType, rpc.name()))) {
+        retainedRpcs.add(retainedRpc);
       }
     }
 
-    // If child RPCs are retained, return a subset of this service.
-    ImmutableList<Rpc> retainedRpcs = retainedRpcsBuilde.build();
-    if (!retainedRpcs.isEmpty()) {
-      return new Service(name, element, retainedRpcs, options);
-    }
+    return new Service(protoType, location, documentation, name, retainedRpcs.build(),
+        options.retainAll(schema, markSet));
+  }
 
-    // Neither this service, nor any of its RPCs are retained.
-    return null;
+  static ImmutableList<Service> fromElements(String packageName,
+      ImmutableList<ServiceElement> elements) {
+    ImmutableList.Builder<Service> services = ImmutableList.builder();
+    for (ServiceElement service : elements) {
+      ProtoType protoType = ProtoType.get(packageName, service.name());
+      services.add(Service.fromElement(protoType, service));
+    }
+    return services.build();
+  }
+
+  static ImmutableList<ServiceElement> toElements(ImmutableList<Service> services) {
+    ImmutableList.Builder<ServiceElement> elements = new ImmutableList.Builder<>();
+    for (Service service : services) {
+      elements.add(ServiceElement.builder(service.location)
+          .documentation(service.documentation)
+          .name(service.name)
+          .rpcs(Rpc.toElements(service.rpcs))
+          .options(service.options.toElements())
+          .build());
+    }
+    return elements.build();
   }
 }

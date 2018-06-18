@@ -15,39 +15,59 @@
  */
 package com.squareup.wire.schema;
 
-import com.squareup.protoparser.RpcElement;
+import com.google.common.collect.ImmutableList;
+import com.squareup.wire.schema.internal.parser.RpcElement;
 
 public final class Rpc {
-  private final String packageName;
-  private final RpcElement element;
+  private final Location location;
+  private final String name;
+  private final String documentation;
+  private final String requestTypeElement;
+  private final String responseTypeElement;
   private final Options options;
-  private Type.Name requestType;
-  private Type.Name responseType;
+  private ProtoType requestType;
+  private ProtoType responseType;
+  private final boolean requestStreaming;
+  private final boolean responseStreaming;
 
-  Rpc(String packageName, RpcElement element) {
-    this.packageName = packageName;
-    this.element = element;
-    this.options = new Options(Type.Name.METHOD_OPTIONS, packageName, element.options());
+  private Rpc(Location location, String name, String documentation, String requestType,
+      String responseType, boolean requestStreaming, boolean responseStreaming, Options options) {
+    this.location = location;
+    this.name = name;
+    this.documentation = documentation;
+    this.requestTypeElement = requestType;
+    this.responseTypeElement = responseType;
+    this.requestStreaming = requestStreaming;
+    this.responseStreaming = responseStreaming;
+    this.options = options;
   }
 
-  public String packageName() {
-    return packageName;
+  public Location location() {
+    return location;
   }
 
   public String name() {
-    return element.name();
+    return name;
   }
 
   public String documentation() {
-    return element.documentation();
+    return documentation;
   }
 
-  public Type.Name requestType() {
+  public ProtoType requestType() {
     return requestType;
   }
 
-  public Type.Name responseType() {
+  public ProtoType responseType() {
     return responseType;
+  }
+
+  public boolean requestStreaming() {
+    return requestStreaming;
+  }
+
+  public boolean responseStreaming() {
+    return responseStreaming;
   }
 
   public Options options() {
@@ -55,11 +75,55 @@ public final class Rpc {
   }
 
   void link(Linker linker) {
-    requestType = linker.resolveNamedType(packageName, element.requestType().name());
-    responseType = linker.resolveNamedType(packageName, element.responseType().name());
+    linker = linker.withContext(this);
+    requestType = linker.resolveMessageType(requestTypeElement);
+    responseType = linker.resolveMessageType(responseTypeElement);
   }
 
   void linkOptions(Linker linker) {
+    linker = linker.withContext(this);
     options.link(linker);
+  }
+
+  void validate(Linker linker) {
+    linker = linker.withContext(this);
+    linker.validateImport(location(), requestType);
+    linker.validateImport(location(), responseType);
+  }
+
+  Rpc retainAll(Schema schema, MarkSet markSet) {
+    if (!markSet.contains(requestType) || !markSet.contains(responseType)) return null;
+    Rpc result = new Rpc(location, name, documentation, requestTypeElement, responseTypeElement,
+            requestStreaming, responseStreaming, options.retainAll(schema, markSet));
+    result.requestType = requestType;
+    result.responseType = responseType;
+    return result;
+  }
+
+  static ImmutableList<Rpc> fromElements(ImmutableList<RpcElement> elements) {
+    ImmutableList.Builder<Rpc> rpcs = new ImmutableList.Builder<>();
+    for (RpcElement rpcElement : elements) {
+      rpcs.add(new Rpc(rpcElement.location(), rpcElement.name(), rpcElement.documentation(),
+          rpcElement.requestType(), rpcElement.responseType(),
+          rpcElement.requestStreaming(), rpcElement.responseStreaming(),
+          new Options(Options.METHOD_OPTIONS, rpcElement.options())));
+    }
+    return rpcs.build();
+  }
+
+  static ImmutableList<RpcElement> toElements(ImmutableList<Rpc> rpcs) {
+    ImmutableList.Builder<RpcElement> elements = new ImmutableList.Builder<>();
+    for (Rpc rpc : rpcs) {
+      elements.add(RpcElement.builder(rpc.location)
+          .documentation(rpc.documentation)
+          .name(rpc.name)
+          .requestType(rpc.requestTypeElement)
+          .responseType(rpc.responseTypeElement)
+          .requestStreaming(rpc.requestStreaming)
+          .responseStreaming(rpc.responseStreaming)
+          .options(rpc.options.toElements())
+          .build());
+    }
+    return elements.build();
   }
 }

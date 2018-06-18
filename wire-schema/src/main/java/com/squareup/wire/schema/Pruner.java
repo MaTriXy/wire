@@ -16,200 +16,246 @@
 package com.squareup.wire.schema;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import java.util.ArrayDeque;
-import java.util.Collection;
 import java.util.Deque;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-/** Removes unused types and services. */
-public final class Pruner {
-  /** Homogeneous identifiers including type names, service names, and RPC names. */
-  final Set<String> marks = new LinkedHashSet<String>();
-
-  /** Identifiers whose immediate dependencies have not yet been marked. */
-  final Deque<String> queue = new ArrayDeque<String>();
+/**
+ * Creates a new schema that contains only the types selected by an identifier set, including their
+ * transitive dependencies.
+ */
+final class Pruner {
+  final Schema schema;
+  final IdentifierSet identifierSet;
+  final MarkSet marks;
 
   /**
-   * Returns a new root set that contains only the types in {@code roots} and their transitive
-   * dependencies.
-   *
-   * @param roots a set of identifiers to retain, which may be fully qualified type names, fully
-   *     qualified service names, or service RPCs like {@code package.ServiceName#MethodName}.
+   * {@link ProtoType types} and {@link ProtoMember members} whose immediate dependencies have not
+   * yet been visited.
    */
-  public ImmutableList<WireProtoFile> retainRoots(
-      List<WireProtoFile> protoFiles, Collection<String> roots) {
-    if (roots.isEmpty()) throw new IllegalArgumentException();
-    if (!marks.isEmpty()) throw new IllegalStateException();
+  final Deque<Object> queue;
 
-    Map<String, Type> typesIndex = buildTypesIndex(protoFiles);
-    Map<String, Service> servicesIndex = buildServicesIndex(protoFiles);
+  Pruner(Schema schema, IdentifierSet identifierSet) {
+    this.schema = schema;
+    this.identifierSet = identifierSet;
+    this.marks = new MarkSet(identifierSet);
+    this.queue = new ArrayDeque<>();
+  }
 
-    // Mark and enqueue the roots.
-    for (String s : roots) {
-      mark(s);
+  public Schema prune() {
+    markRoots();
+    markReachable();
+
+    ImmutableList.Builder<ProtoFile> retained = ImmutableList.builder();
+    for (ProtoFile protoFile : schema.protoFiles()) {
+      retained.add(protoFile.retainAll(schema, marks));
     }
 
-    // Extensions and options are also roots.
-    for (WireProtoFile protoFile : protoFiles) {
-      for (Extend extend : protoFile.extendList()) {
-        markExtend(extend);
+    return new Schema(retained.build());
+  }
+
+  private void markRoots() {
+    for (ProtoFile protoFile : schema.protoFiles()) {
+      markRoots(protoFile);
+    }
+  }
+
+  private void markRoots(ProtoFile protoFile) {
+    for (Type type : protoFile.types()) {
+      markRoots(type);
+    }
+    for (Service service : protoFile.services()) {
+      markRoots(service);
+    }
+  }
+
+  private void markRoots(Type type) {
+    ProtoType protoType = type.type();
+    if (identifierSet.includes(protoType)) {
+      marks.root(protoType);
+      queue.add(protoType);
+    } else {
+      if (type instanceof MessageType) {
+        for (Field field : ((MessageType) type).fieldsAndOneOfFields()) {
+          markRoots(ProtoMember.get(protoType, field.name()));
+        }
+      } else if (type instanceof EnumType) {
+        for (EnumConstant enumConstant : ((EnumType) type).constants()) {
+          markRoots(ProtoMember.get(protoType, enumConstant.name()));
+        }
+      } else {
+        throw new AssertionError();
       }
-      markOptions(protoFile.options());
     }
 
+    for (Type nested : type.nestedTypes()) {
+      markRoots(nested);
+    }
+  }
+
+  private void markRoots(Service service) {
+    ProtoType protoType = service.type();
+    if (identifierSet.includes(protoType)) {
+      marks.root(protoType);
+      queue.add(protoType);
+    } else {
+      for (Rpc rpc : service.rpcs()) {
+        markRoots(ProtoMember.get(protoType, rpc.name()));
+      }
+    }
+  }
+
+  private void markRoots(ProtoMember protoMember) {
+    if (identifierSet.includes(protoMember)) {
+      marks.root(protoMember);
+      queue.add(protoMember);
+    }
+  }
+
+  private void markReachable() {
     // Mark everything reachable by what's enqueued, queueing new things as we go.
-    for (String name; (name = queue.poll()) != null;) {
-      if (Type.Name.getScalar(name) != null) {
-        continue; // Skip scalar types.
-      }
-
-      Type type = typesIndex.get(name);
-      if (type != null) {
-        markType(type);
-        continue;
-      }
-
-      Service service = servicesIndex.get(name);
-      if (service != null) {
-        markService(service);
-        continue;
-      }
-
-      // If the root set contains a method name like 'Service#Method', only that RPC is marked.
-      int hash = name.indexOf('#');
-      if (hash != -1) {
-        String serviceName = name.substring(0, hash);
-        String rpcName = name.substring(hash + 1);
-        Service partialService = servicesIndex.get(serviceName);
-        if (partialService != null) {
-          Rpc rpc = partialService.rpc(rpcName);
-          if (rpc != null) {
-            markOptions(partialService.options());
-            markRpc(rpc);
+    for (Object root; (root = queue.poll()) != null;) {
+      if (root instanceof ProtoMember) {
+        ProtoMember protoMember = (ProtoMember) root;
+        mark(protoMember.type());
+        String member = ((ProtoMember) root).member();
+        Type type = schema.getType(protoMember.type());
+        if (type instanceof MessageType) {
+          Field field = ((MessageType) type).field(member);
+          if (field == null) {
+            field = ((MessageType) type).extensionField(member);
+          }
+          if (field != null) {
+            markField(type.type(), field);
+            continue;
+          }
+        } else if (type instanceof EnumType) {
+          EnumConstant constant = ((EnumType) type).constant(member);
+          if (constant != null) {
+            markOptions(constant.options());
             continue;
           }
         }
-      }
 
-      throw new IllegalArgumentException("Unexpected type: " + name);
-    }
+        Service service = schema.getService(protoMember.type());
+        if (service != null) {
+          Rpc rpc = service.rpc(member);
+          if (rpc != null) {
+            markRpc(service.type(), rpc);
+            continue;
+          }
+        }
 
-    ImmutableList.Builder<WireProtoFile> retained = ImmutableList.builder();
-    for (WireProtoFile protoFile : protoFiles) {
-      retained.add(protoFile.retainAll(marks));
-    }
+        throw new IllegalArgumentException("Unexpected member: " + root);
 
-    return retained.build();
-  }
+      } else if (root instanceof ProtoType) {
+        ProtoType protoType = (ProtoType) root;
+        if (protoType.isScalar()) {
+          continue; // Skip scalar types.
+        }
 
-  private static Map<String, Type> buildTypesIndex(Collection<WireProtoFile> protoFiles) {
-    Map<String, Type> result = new LinkedHashMap<String, Type>();
-    for (WireProtoFile protoFile : protoFiles) {
-      for (Type type : protoFile.types()) {
-        index(result, type);
-      }
-    }
-    return ImmutableMap.copyOf(result);
-  }
+        Type type = schema.getType(protoType);
+        if (type != null) {
+          markType(type);
+          continue;
+        }
 
-  private static void index(Map<String, Type> typesByName, Type type) {
-    typesByName.put(type.name().toString(), type);
-    for (Type nested : type.nestedTypes()) {
-      index(typesByName, nested);
-    }
-  }
+        Service service = schema.getService(protoType);
+        if (service != null) {
+          markService(service);
+          continue;
+        }
 
-  private static ImmutableMap<String, Service> buildServicesIndex(
-      Collection<WireProtoFile> protoFiles) {
-    ImmutableMap.Builder<String, Service> result = ImmutableMap.builder();
-    for (WireProtoFile protoFile : protoFiles) {
-      for (Service service : protoFile.services()) {
-        result.put(service.name().toString(), service);
+        throw new IllegalArgumentException("Unexpected type: " + root);
+
+      } else {
+        throw new AssertionError();
       }
     }
-    return result.build();
   }
 
-  private void mark(Type.Name typeName) {
-    mark(typeName.toString());
-  }
+  private void mark(ProtoType type) {
+    // Mark the map type as it's non-scalar and transitively reachable.
+    if (type.isMap()) {
+      marks.mark(type);
+      // Map key type is always scalar. No need to mark it.
+      type = type.valueType();
+    }
 
-  private void mark(String identifier) {
-    if (marks.add(identifier)) {
-      queue.add(identifier); // The transitive dependencies of this identifier must be visited.
+    if (marks.mark(type)) {
+      queue.add(type); // The transitive dependencies of this type must be visited.
     }
   }
 
-  private void markExtend(Extend extend) {
-    mark(extend.type());
-    markFields(extend.fields());
+  private void mark(ProtoMember protoMember) {
+    if (marks.mark(protoMember)) {
+      queue.add(protoMember); // The transitive dependencies of this member must be visited.
+    }
   }
 
   private void markType(Type type) {
     markOptions(type.options());
 
-    Type.Name enclosingTypeName = type.name().enclosingTypeName();
-    if (enclosingTypeName != null) {
-      mark(enclosingTypeName);
-    }
-
-    for (Type nestedType : type.nestedTypes()) {
-      mark(nestedType.name());
-    }
-
-    if (type instanceof MessageType) {
-      markMessage((MessageType) type);
-    } else if (type instanceof EnumType) {
-      markEnum((EnumType) type);
+    if (marks.containsAllMembers(type.type())) {
+      if (type instanceof MessageType) {
+        markMessage((MessageType) type);
+      } else if (type instanceof EnumType) {
+        markEnum((EnumType) type);
+      }
     }
   }
 
   private void markMessage(MessageType message) {
-    markFields(message.fields());
+    markFields(message.type(), message.fields());
     for (OneOf oneOf : message.oneOfs()) {
-      markFields(oneOf.fields());
+      markFields(message.type(), oneOf.fields());
     }
   }
 
   private void markEnum(EnumType wireEnum) {
     markOptions(wireEnum.options());
-    for (EnumConstant constant : wireEnum.constants()) {
-      markOptions(constant.options());
+    if (marks.containsAllMembers(wireEnum.type())) {
+      for (EnumConstant constant : wireEnum.constants()) {
+        if (marks.contains(ProtoMember.get(wireEnum.type(), constant.name()))) {
+          markOptions(constant.options());
+        }
+      }
     }
   }
 
-  private void markFields(ImmutableList<Field> fields) {
+  private void markFields(ProtoType declaringType, ImmutableList<Field> fields) {
     for (Field field : fields) {
-      markField(field);
+      markField(declaringType, field);
     }
   }
 
-  private void markField(Field field) {
-    markOptions(field.options());
-    mark(field.type());
+  private void markField(ProtoType declaringType, Field field) {
+    if (marks.contains(ProtoMember.get(declaringType, field.name()))) {
+      markOptions(field.options());
+      mark(field.type());
+    }
   }
 
   private void markOptions(Options options) {
-    for (Field field : options.fields()) {
-      markField(field);
+    for (Map.Entry<ProtoType, ProtoMember> entry : options.fields().entries()) {
+      mark(entry.getValue());
     }
   }
 
   private void markService(Service service) {
     markOptions(service.options());
-    for (Rpc rpc : service.rpcs()) {
-      markRpc(rpc);
+    if (marks.containsAllMembers(service.type())) {
+      for (Rpc rpc : service.rpcs()) {
+        markRpc(service.type(), rpc);
+      }
     }
   }
 
-  private void markRpc(Rpc rpc) {
-    markOptions(rpc.options());
-    mark(rpc.requestType());
-    mark(rpc.responseType());
+  private void markRpc(ProtoType declaringType, Rpc rpc) {
+    if (marks.contains(ProtoMember.get(declaringType, rpc.name()))) {
+      markOptions(rpc.options());
+      mark(rpc.requestType());
+      mark(rpc.responseType());
+    }
   }
 }
