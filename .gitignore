@@ -7,12 +7,20 @@ classes
 .classpath
 .project
 
-# Maven
-target
-pom.xml.*
-release.properties
-
-# Maven shade plugin
-dependency-reduced-pom.xml
-
 out/
+
+# Gradle
+.gradle
+build
+generated
+
+# Maven
+plugin*.xml
+
+# Special Mkdocs files
+wire-library/docs/3.x
+wire-library/docs/changelog.md
+wire-library/docs/contributing.md
+wire-library/docs/index.md
+
+local.properties

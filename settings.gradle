@@ -1,0 +1,5 @@
+include ':sample'
+include ':wire-codegen-sample'
+include ':wire-grpc-tests'
+include ':wire-protoc-compatibility-tests'
+includeBuild 'wire-library'
