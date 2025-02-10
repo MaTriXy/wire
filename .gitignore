@@ -7,20 +7,34 @@ classes
 .classpath
 .project
 
+gen/
 out/
+
+# Kotlin
+.kotlin
 
 # Gradle
 .gradle
 build
 generated
+gradlew
+gradlew.bat
 
 # Maven
 plugin*.xml
 
+# SPM
+.build
+.swiftpm
+
 # Special Mkdocs files
-wire-library/docs/3.x
-wire-library/docs/changelog.md
-wire-library/docs/contributing.md
-wire-library/docs/index.md
+docs/3.x
+docs/changelog.md
+docs/contributing.md
 
 local.properties
+
+# for dependency watching with https://github.com/JakeWharton/dependency-watch/
+watched-deps
+deps-watch.toml
+

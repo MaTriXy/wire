@@ -1,0 +1,98 @@
+/*
+ * Copyright 2020 Square Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+syntax = "proto2";
+
+import "redacted_option.proto";
+
+message Redacted {
+  required string name = 1 [(squareup.protos.redacted_option.redacted) = true];
+
+  optional Redacted2 nested = 2;
+
+  oneof choice {
+    string yes = 3;
+    string no = 4 [(squareup.protos.redacted_option.redacted) = true];
+  }
+}
+
+message Redacted2 {
+  required string name = 1;
+
+  optional Redacted3 fully_redacted = 2 [(squareup.protos.redacted_option.redacted) = true];
+  optional Redacted3 partially_redacted = 3;
+}
+
+message Redacted3 {
+  required string name = 1;
+
+  optional bool enabled = 2 [(squareup.protos.redacted_option.redacted) = true];
+}
+
+message RedactedLargeMessage {
+  optional string a = 1 [(squareup.protos.redacted_option.redacted) = true];
+  optional string b = 2 [(squareup.protos.redacted_option.redacted) = false];
+  optional string c = 3;
+  optional string d = 4;
+  optional string e = 5;
+  optional string f = 6;
+  optional string g = 7;
+  optional string h = 8;
+  optional string i = 9;
+  optional string j = 10;
+  optional string k = 11;
+  optional string l = 12;
+  optional string m = 13;
+  optional string n = 14;
+  optional string o = 15;
+  optional string p = 16;
+  optional string q = 17;
+  optional string r = 18;
+  optional string s = 19;
+  optional string t = 20;
+  optional string u = 21;
+  optional string v = 22;
+  optional string w = 23;
+  optional string x = 24;
+  optional string y = 25;
+  optional string z = 26;
+
+  // A large message with a redacted description causes a Swift compiler error.
+  optional string description = 27 [(squareup.protos.redacted_option.redacted) = true];
+
+  message RedactedLargeOneOf {
+    oneof action {
+      string value1 = 1;
+      string value2 = 2;
+      string value3 = 3;
+      string value4 = 4;
+      string value5 = 5;
+      string value6 = 6;
+      string value7 = 7;
+      string value8 = 8;
+      string value9 = 9;
+      string value10 = 10;
+      string value11 = 11;
+      string value12 = 12;
+      string value13 = 13;
+      string value14 = 14;
+      string value15 = 15;
+      string value16 = 16;
+
+      // A large message with a redacted description causes a Swift compiler error.
+      string description = 17 [(squareup.protos.redacted_option.redacted) = true];
+    }
+  }
+}

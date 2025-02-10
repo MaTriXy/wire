@@ -1,19 +1,44 @@
 site_name: Wire
+site_url: https://square.github.io/wire
 repo_name: Wire
 repo_url: https://github.com/square/wire
 site_description: "gRPC and protocol buffers for Android, Kotlin, and Java."
 site_author: Square, Inc.
 remote_branch: gh-pages
+edit_uri: ""
 
-copyright: 'Copyright &copy; 2019 Square, Inc.'
+copyright: 'Copyright &copy; 2023 Square, Inc.'
 
 theme:
   name: 'material'
   favicon: images/icon-square.png
   logo: images/icon-square.png
   palette:
-    primary: 'blue'
-    accent: 'white'
+    # Palette toggle for light mode
+    - scheme: default
+      media: "(prefers-color-scheme: light)"
+      primary: 'blue'
+      accent: 'white'
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      media: "(prefers-color-scheme: dark)"
+      primary: 'blue'
+      accent: 'white'
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+
+extra:
+  social:
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/squareeng
+    - icon: fontawesome/brands/stack-overflow
+      link: https://stackoverflow.com/questions/tagged/square-wire?sort=active
 
 extra_css:
   - 'css/app.css'
@@ -33,22 +58,35 @@ markdown_extensions:
   - pymdownx.magiclink
   - pymdownx.smartsymbols
   - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tilde
   - tables
 
 nav:
   - 'Overview': index.md
   - 'Gradle Plugin': wire_compiler.md
   - 'gRPC': wire_grpc.md
-  - 'Stack Overflow ⏏': https://stackoverflow.com/questions/tagged/wire?sort=active
+  - 'Stack Overflow ⏏': https://stackoverflow.com/questions/tagged/square-wire?sort=active
   - '3.x API':
-    - 'wire-grpc-client': 3.x/wire-grpc-client/com.squareup.wire/index.md
-    - 'wire-moshi-adapter': 3.x/wire-moshi-adapter/com.squareup.wire/index.md
-    - 'wire-runtime': 3.x/wire-runtime/com.squareup.wire/index.md
+    - 'wire-compiler': 3.x/wire-compiler/index.html
+    - 'wire-gradle-plugin': 3.x/wire-gradle-plugin/index.html
+    - 'wire-grpc-client': 3.x/wire-grpc-client/index.html
+    - 'wire-gson-support': 3.x/wire-gson-support/index.html
+    - 'wire-java-generator': 3.x/wire-java-generator/index.html
+    - 'wire-kotlin-generator': 3.x/wire-kotlin-generator/index.html
+    - 'wire-moshi-adapter': 3.x/wire-moshi-adapter/index.html
+    - 'wire-reflector': 3.x/wire-reflector/index.html
+    - 'wire-runtime': 3.x/wire-runtime/index.html
+    - 'wire-schema': 3.x/wire-schema/index.html
+    - 'wire-schema-tests': 3.x/wire-schema-tests/index.html
+    - 'wire-swift-generator': 3.x/wire-swift-generator/index.html
   - '2.x API':
     - 'wire-gson-support ⏏': https://square.github.io/wire/2.x/wire-gson-support/
     - 'wire-runtime ⏏': https://square.github.io/wire/2.x/wire-runtime/
+  - 'JSON': wire_json.md
+  - 'Wire vs Protoc': wire_vs_protoc.md
   - 'Change Log': changelog.md
   - 'Contributing': contributing.md
   - 'Code of Conduct': code_of_conduct.md
   - 'Protocol Buffers ⏏': https://developers.google.com/protocol-buffers/docs/proto
-

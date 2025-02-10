@@ -1,0 +1,26 @@
+syntax = "proto2";
+
+package squareup.wire.mutable;
+
+message Header {
+  optional uint64 id = 1;
+}
+
+message Payload {
+  enum Type {
+    TYPE_TEXT_PLAIN = 1;
+    TYPE_TEXT_HTML = 2;
+    TYPE_IMAGE_JPEG = 3;
+    TYPE_IMAGE_PNG = 4;
+    TYPE_UNKNOWN = 10;
+  }
+  optional string preamble = 1;
+  optional bytes content = 2;
+  optional Type type = 3;
+  repeated string footers = 4;
+}
+
+message Packet {
+  optional Header header = 1;
+  repeated Payload payload = 2;
+}

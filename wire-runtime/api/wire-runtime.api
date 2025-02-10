@@ -1,0 +1,692 @@
+public abstract class com/squareup/wire/AndroidMessage : com/squareup/wire/Message, android/os/Parcelable {
+	public static final field Companion Lcom/squareup/wire/AndroidMessage$Companion;
+	protected fun <init> (Lcom/squareup/wire/ProtoAdapter;Lokio/ByteString;)V
+	public fun describeContents ()I
+	public static final fun newCreator (Lcom/squareup/wire/ProtoAdapter;)Landroid/os/Parcelable$Creator;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/squareup/wire/AndroidMessage$Companion {
+	public final fun newCreator (Lcom/squareup/wire/ProtoAdapter;)Landroid/os/Parcelable$Creator;
+}
+
+public final class com/squareup/wire/AnyMessage : com/squareup/wire/Message {
+	public static final field ADAPTER Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lcom/squareup/wire/AnyMessage$Companion;
+	public fun <init> (Ljava/lang/String;Lokio/ByteString;)V
+	public synthetic fun <init> (Ljava/lang/String;Lokio/ByteString;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun copy (Ljava/lang/String;Lokio/ByteString;)Lcom/squareup/wire/AnyMessage;
+	public static synthetic fun copy$default (Lcom/squareup/wire/AnyMessage;Ljava/lang/String;Lokio/ByteString;ILjava/lang/Object;)Lcom/squareup/wire/AnyMessage;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getTypeUrl ()Ljava/lang/String;
+	public final fun getValue ()Lokio/ByteString;
+	public fun hashCode ()I
+	public synthetic fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public synthetic fun newBuilder ()Ljava/lang/Void;
+	public fun toString ()Ljava/lang/String;
+	public final fun unpack (Lcom/squareup/wire/ProtoAdapter;)Ljava/lang/Object;
+	public final fun unpackOrNull (Lcom/squareup/wire/ProtoAdapter;)Ljava/lang/Object;
+}
+
+public final class com/squareup/wire/AnyMessage$Companion {
+	public final fun pack (Lcom/squareup/wire/Message;)Lcom/squareup/wire/AnyMessage;
+}
+
+public final class com/squareup/wire/DurationKt {
+	public static final fun durationOfSeconds (JJ)Ljava/time/Duration;
+}
+
+public abstract class com/squareup/wire/EnumAdapter : com/squareup/wire/ProtoAdapter {
+	public fun <init> (Ljava/lang/Class;)V
+	public fun <init> (Ljava/lang/Class;Lcom/squareup/wire/Syntax;)V
+	public fun <init> (Ljava/lang/Class;Lcom/squareup/wire/Syntax;Lcom/squareup/wire/WireEnum;)V
+	public fun <init> (Lkotlin/reflect/KClass;)V
+	public fun <init> (Lkotlin/reflect/KClass;Lcom/squareup/wire/Syntax;)V
+	protected fun <init> (Lkotlin/reflect/KClass;Lcom/squareup/wire/Syntax;Lcom/squareup/wire/WireEnum;)V
+	public fun decode (Lcom/squareup/wire/ProtoReader32;)Lcom/squareup/wire/WireEnum;
+	public synthetic fun decode (Lcom/squareup/wire/ProtoReader32;)Ljava/lang/Object;
+	public fun decode (Lcom/squareup/wire/ProtoReader;)Lcom/squareup/wire/WireEnum;
+	public synthetic fun decode (Lcom/squareup/wire/ProtoReader;)Ljava/lang/Object;
+	public fun encode (Lcom/squareup/wire/ProtoWriter;Lcom/squareup/wire/WireEnum;)V
+	public synthetic fun encode (Lcom/squareup/wire/ProtoWriter;Ljava/lang/Object;)V
+	public fun encode (Lcom/squareup/wire/ReverseProtoWriter;Lcom/squareup/wire/WireEnum;)V
+	public synthetic fun encode (Lcom/squareup/wire/ReverseProtoWriter;Ljava/lang/Object;)V
+	public fun encodedSize (Lcom/squareup/wire/WireEnum;)I
+	public synthetic fun encodedSize (Ljava/lang/Object;)I
+	protected abstract fun fromValue (I)Lcom/squareup/wire/WireEnum;
+	public fun redact (Lcom/squareup/wire/WireEnum;)Lcom/squareup/wire/WireEnum;
+	public synthetic fun redact (Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class com/squareup/wire/FieldEncoding : java/lang/Enum {
+	public static final field Companion Lcom/squareup/wire/FieldEncoding$Companion;
+	public static final field FIXED32 Lcom/squareup/wire/FieldEncoding;
+	public static final field FIXED64 Lcom/squareup/wire/FieldEncoding;
+	public static final field LENGTH_DELIMITED Lcom/squareup/wire/FieldEncoding;
+	public static final field VARINT Lcom/squareup/wire/FieldEncoding;
+	public static final fun get$wire_runtime (I)Lcom/squareup/wire/FieldEncoding;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun rawProtoAdapter ()Lcom/squareup/wire/ProtoAdapter;
+	public static fun valueOf (Ljava/lang/String;)Lcom/squareup/wire/FieldEncoding;
+	public static fun values ()[Lcom/squareup/wire/FieldEncoding;
+}
+
+public final class com/squareup/wire/FieldEncoding$Companion {
+}
+
+public final class com/squareup/wire/InstantKt {
+	public static final fun ofEpochSecond (JJ)Ljava/time/Instant;
+}
+
+public abstract class com/squareup/wire/Message : java/io/Serializable {
+	public static final field Companion Lcom/squareup/wire/Message$Companion;
+	protected field hashCode I
+	protected fun <init> (Lcom/squareup/wire/ProtoAdapter;Lokio/ByteString;)V
+	public final fun adapter ()Lcom/squareup/wire/ProtoAdapter;
+	public final fun encode ()[B
+	public final fun encode (Ljava/io/OutputStream;)V
+	public final fun encode (Lokio/BufferedSink;)V
+	public final fun encodeByteString ()Lokio/ByteString;
+	public abstract fun newBuilder ()Lcom/squareup/wire/Message$Builder;
+	public fun toString ()Ljava/lang/String;
+	public fun unknownFields ()Lokio/ByteString;
+	public final fun withoutUnknownFields ()Lcom/squareup/wire/Message;
+	protected final fun writeReplace ()Ljava/lang/Object;
+}
+
+public abstract class com/squareup/wire/Message$Builder {
+	protected fun <init> ()V
+	public final fun addUnknownField (ILcom/squareup/wire/FieldEncoding;Ljava/lang/Object;)Lcom/squareup/wire/Message$Builder;
+	public final fun addUnknownFields (Lokio/ByteString;)Lcom/squareup/wire/Message$Builder;
+	public abstract fun build ()Lcom/squareup/wire/Message;
+	public final fun buildUnknownFields ()Lokio/ByteString;
+	public final fun clearUnknownFields ()Lcom/squareup/wire/Message$Builder;
+}
+
+public final class com/squareup/wire/Message$Companion {
+}
+
+public abstract interface class com/squareup/wire/MessageSink : java/io/Closeable {
+	public abstract fun cancel ()V
+	public abstract fun write (Ljava/lang/Object;)V
+}
+
+public abstract interface class com/squareup/wire/MessageSource : java/io/Closeable {
+	public abstract fun read ()Ljava/lang/Object;
+}
+
+public final class com/squareup/wire/OneOf {
+	public fun <init> (Lcom/squareup/wire/OneOf$Key;Ljava/lang/Object;)V
+	public final fun component1 ()Lcom/squareup/wire/OneOf$Key;
+	public final fun component2 ()Ljava/lang/Object;
+	public final fun copy (Lcom/squareup/wire/OneOf$Key;Ljava/lang/Object;)Lcom/squareup/wire/OneOf;
+	public static synthetic fun copy$default (Lcom/squareup/wire/OneOf;Lcom/squareup/wire/OneOf$Key;Ljava/lang/Object;ILjava/lang/Object;)Lcom/squareup/wire/OneOf;
+	public final fun encodeWithTag (Lcom/squareup/wire/ProtoWriter;)V
+	public final fun encodeWithTag (Lcom/squareup/wire/ReverseProtoWriter;)V
+	public final fun encodedSizeWithTag ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKey ()Lcom/squareup/wire/OneOf$Key;
+	public final fun getOrNull (Lcom/squareup/wire/OneOf$Key;)Ljava/lang/Object;
+	public final fun getValue ()Ljava/lang/Object;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class com/squareup/wire/OneOf$Key {
+	public fun <init> (ILcom/squareup/wire/ProtoAdapter;Ljava/lang/String;ZLjava/lang/String;)V
+	public synthetic fun <init> (ILcom/squareup/wire/ProtoAdapter;Ljava/lang/String;ZLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getAdapter ()Lcom/squareup/wire/ProtoAdapter;
+	public final fun getDeclaredName ()Ljava/lang/String;
+	public final fun getJsonName ()Ljava/lang/String;
+	public final fun getRedacted ()Z
+	public final fun getTag ()I
+}
+
+public abstract class com/squareup/wire/ProtoAdapter {
+	public static final field BOOL Lcom/squareup/wire/ProtoAdapter;
+	public static final field BOOL_VALUE Lcom/squareup/wire/ProtoAdapter;
+	public static final field BYTES Lcom/squareup/wire/ProtoAdapter;
+	public static final field BYTES_VALUE Lcom/squareup/wire/ProtoAdapter;
+	public static final field Companion Lcom/squareup/wire/ProtoAdapter$Companion;
+	public static final field DOUBLE Lcom/squareup/wire/ProtoAdapter;
+	public static final field DOUBLE_ARRAY Lcom/squareup/wire/ProtoAdapter;
+	public static final field DOUBLE_VALUE Lcom/squareup/wire/ProtoAdapter;
+	public static final field DURATION Lcom/squareup/wire/ProtoAdapter;
+	public static final field EMPTY Lcom/squareup/wire/ProtoAdapter;
+	public static final field FIXED32 Lcom/squareup/wire/ProtoAdapter;
+	public static final field FIXED32_ARRAY Lcom/squareup/wire/ProtoAdapter;
+	public static final field FIXED64 Lcom/squareup/wire/ProtoAdapter;
+	public static final field FIXED64_ARRAY Lcom/squareup/wire/ProtoAdapter;
+	public static final field FLOAT Lcom/squareup/wire/ProtoAdapter;
+	public static final field FLOAT_ARRAY Lcom/squareup/wire/ProtoAdapter;
+	public static final field FLOAT_VALUE Lcom/squareup/wire/ProtoAdapter;
+	public static final field INSTANT Lcom/squareup/wire/ProtoAdapter;
+	public static final field INT32 Lcom/squareup/wire/ProtoAdapter;
+	public static final field INT32_ARRAY Lcom/squareup/wire/ProtoAdapter;
+	public static final field INT32_VALUE Lcom/squareup/wire/ProtoAdapter;
+	public static final field INT64 Lcom/squareup/wire/ProtoAdapter;
+	public static final field INT64_ARRAY Lcom/squareup/wire/ProtoAdapter;
+	public static final field INT64_VALUE Lcom/squareup/wire/ProtoAdapter;
+	public static final field SFIXED32 Lcom/squareup/wire/ProtoAdapter;
+	public static final field SFIXED32_ARRAY Lcom/squareup/wire/ProtoAdapter;
+	public static final field SFIXED64 Lcom/squareup/wire/ProtoAdapter;
+	public static final field SFIXED64_ARRAY Lcom/squareup/wire/ProtoAdapter;
+	public static final field SINT32 Lcom/squareup/wire/ProtoAdapter;
+	public static final field SINT32_ARRAY Lcom/squareup/wire/ProtoAdapter;
+	public static final field SINT64 Lcom/squareup/wire/ProtoAdapter;
+	public static final field SINT64_ARRAY Lcom/squareup/wire/ProtoAdapter;
+	public static final field STRING Lcom/squareup/wire/ProtoAdapter;
+	public static final field STRING_VALUE Lcom/squareup/wire/ProtoAdapter;
+	public static final field STRUCT_LIST Lcom/squareup/wire/ProtoAdapter;
+	public static final field STRUCT_MAP Lcom/squareup/wire/ProtoAdapter;
+	public static final field STRUCT_NULL Lcom/squareup/wire/ProtoAdapter;
+	public static final field STRUCT_VALUE Lcom/squareup/wire/ProtoAdapter;
+	public static final field UINT32 Lcom/squareup/wire/ProtoAdapter;
+	public static final field UINT32_ARRAY Lcom/squareup/wire/ProtoAdapter;
+	public static final field UINT32_VALUE Lcom/squareup/wire/ProtoAdapter;
+	public static final field UINT64 Lcom/squareup/wire/ProtoAdapter;
+	public static final field UINT64_ARRAY Lcom/squareup/wire/ProtoAdapter;
+	public static final field UINT64_VALUE Lcom/squareup/wire/ProtoAdapter;
+	public fun <init> (Lcom/squareup/wire/FieldEncoding;Ljava/lang/Class;)V
+	public fun <init> (Lcom/squareup/wire/FieldEncoding;Ljava/lang/Class;Ljava/lang/String;)V
+	public fun <init> (Lcom/squareup/wire/FieldEncoding;Ljava/lang/Class;Ljava/lang/String;Lcom/squareup/wire/Syntax;)V
+	public fun <init> (Lcom/squareup/wire/FieldEncoding;Ljava/lang/Class;Ljava/lang/String;Lcom/squareup/wire/Syntax;Ljava/lang/Object;)V
+	public fun <init> (Lcom/squareup/wire/FieldEncoding;Ljava/lang/Class;Ljava/lang/String;Lcom/squareup/wire/Syntax;Ljava/lang/Object;Ljava/lang/String;)V
+	public fun <init> (Lcom/squareup/wire/FieldEncoding;Lkotlin/reflect/KClass;)V
+	public fun <init> (Lcom/squareup/wire/FieldEncoding;Lkotlin/reflect/KClass;Ljava/lang/String;)V
+	public fun <init> (Lcom/squareup/wire/FieldEncoding;Lkotlin/reflect/KClass;Ljava/lang/String;Lcom/squareup/wire/Syntax;)V
+	public fun <init> (Lcom/squareup/wire/FieldEncoding;Lkotlin/reflect/KClass;Ljava/lang/String;Lcom/squareup/wire/Syntax;Ljava/lang/Object;)V
+	public fun <init> (Lcom/squareup/wire/FieldEncoding;Lkotlin/reflect/KClass;Ljava/lang/String;Lcom/squareup/wire/Syntax;Ljava/lang/Object;Ljava/lang/String;)V
+	public synthetic fun <init> (Lcom/squareup/wire/FieldEncoding;Lkotlin/reflect/KClass;Ljava/lang/String;Lcom/squareup/wire/Syntax;Ljava/lang/Object;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun asPacked ()Lcom/squareup/wire/ProtoAdapter;
+	public final fun asRepeated ()Lcom/squareup/wire/ProtoAdapter;
+	public fun decode (Lcom/squareup/wire/ProtoReader32;)Ljava/lang/Object;
+	public abstract fun decode (Lcom/squareup/wire/ProtoReader;)Ljava/lang/Object;
+	public final fun decode (Ljava/io/InputStream;)Ljava/lang/Object;
+	public final fun decode (Lokio/BufferedSource;)Ljava/lang/Object;
+	public final fun decode (Lokio/ByteString;)Ljava/lang/Object;
+	public final fun decode ([B)Ljava/lang/Object;
+	public abstract fun encode (Lcom/squareup/wire/ProtoWriter;Ljava/lang/Object;)V
+	public fun encode (Lcom/squareup/wire/ReverseProtoWriter;Ljava/lang/Object;)V
+	public final fun encode (Ljava/io/OutputStream;Ljava/lang/Object;)V
+	public final fun encode (Ljava/lang/Object;)[B
+	public final fun encode (Lokio/BufferedSink;Ljava/lang/Object;)V
+	public final fun encodeByteString (Ljava/lang/Object;)Lokio/ByteString;
+	public fun encodeWithTag (Lcom/squareup/wire/ProtoWriter;ILjava/lang/Object;)V
+	public fun encodeWithTag (Lcom/squareup/wire/ReverseProtoWriter;ILjava/lang/Object;)V
+	public abstract fun encodedSize (Ljava/lang/Object;)I
+	public fun encodedSizeWithTag (ILjava/lang/Object;)I
+	public static final fun get (Lcom/squareup/wire/Message;)Lcom/squareup/wire/ProtoAdapter;
+	public static final fun get (Ljava/lang/Class;)Lcom/squareup/wire/ProtoAdapter;
+	public static final fun get (Ljava/lang/String;)Lcom/squareup/wire/ProtoAdapter;
+	public static final fun get (Ljava/lang/String;Ljava/lang/ClassLoader;)Lcom/squareup/wire/ProtoAdapter;
+	public final fun getIdentity ()Ljava/lang/Object;
+	public final fun getSourceFile ()Ljava/lang/String;
+	public final fun getSyntax ()Lcom/squareup/wire/Syntax;
+	public final fun getType ()Lkotlin/reflect/KClass;
+	public final fun getTypeUrl ()Ljava/lang/String;
+	public static final fun newEnumAdapter (Ljava/lang/Class;)Lcom/squareup/wire/EnumAdapter;
+	public static final fun newMapAdapter (Lcom/squareup/wire/ProtoAdapter;Lcom/squareup/wire/ProtoAdapter;)Lcom/squareup/wire/ProtoAdapter;
+	public static final fun newMessageAdapter (Ljava/lang/Class;)Lcom/squareup/wire/ProtoAdapter;
+	public static final fun newMessageAdapter (Ljava/lang/Class;Ljava/lang/String;)Lcom/squareup/wire/ProtoAdapter;
+	public static final fun newMessageAdapter (Ljava/lang/Class;Ljava/lang/String;Lcom/squareup/wire/Syntax;)Lcom/squareup/wire/ProtoAdapter;
+	public static final fun newMessageAdapter (Ljava/lang/Class;Ljava/lang/String;Lcom/squareup/wire/Syntax;Ljava/lang/ClassLoader;)Lcom/squareup/wire/ProtoAdapter;
+	public abstract fun redact (Ljava/lang/Object;)Ljava/lang/Object;
+	public fun toString (Ljava/lang/Object;)Ljava/lang/String;
+	public final fun tryDecode (Lcom/squareup/wire/ProtoReader32;Ljava/util/List;)V
+	public final fun tryDecode (Lcom/squareup/wire/ProtoReader;Ljava/util/List;)V
+}
+
+public final class com/squareup/wire/ProtoAdapter$Companion {
+	public final fun get (Lcom/squareup/wire/Message;)Lcom/squareup/wire/ProtoAdapter;
+	public final fun get (Ljava/lang/Class;)Lcom/squareup/wire/ProtoAdapter;
+	public final fun get (Ljava/lang/String;)Lcom/squareup/wire/ProtoAdapter;
+	public final fun get (Ljava/lang/String;Ljava/lang/ClassLoader;)Lcom/squareup/wire/ProtoAdapter;
+	public final fun newEnumAdapter (Ljava/lang/Class;)Lcom/squareup/wire/EnumAdapter;
+	public final fun newMapAdapter (Lcom/squareup/wire/ProtoAdapter;Lcom/squareup/wire/ProtoAdapter;)Lcom/squareup/wire/ProtoAdapter;
+	public final fun newMessageAdapter (Ljava/lang/Class;)Lcom/squareup/wire/ProtoAdapter;
+	public final fun newMessageAdapter (Ljava/lang/Class;Ljava/lang/String;)Lcom/squareup/wire/ProtoAdapter;
+	public final fun newMessageAdapter (Ljava/lang/Class;Ljava/lang/String;Lcom/squareup/wire/Syntax;)Lcom/squareup/wire/ProtoAdapter;
+	public final fun newMessageAdapter (Ljava/lang/Class;Ljava/lang/String;Lcom/squareup/wire/Syntax;Ljava/lang/ClassLoader;)Lcom/squareup/wire/ProtoAdapter;
+}
+
+public final class com/squareup/wire/ProtoAdapter$Companion$UnsupportedTypeProtoAdapter : com/squareup/wire/ProtoAdapter {
+	public fun <init> ()V
+	public synthetic fun decode (Lcom/squareup/wire/ProtoReader32;)Ljava/lang/Object;
+	public fun decode (Lcom/squareup/wire/ProtoReader32;)Ljava/lang/Void;
+	public synthetic fun decode (Lcom/squareup/wire/ProtoReader;)Ljava/lang/Object;
+	public fun decode (Lcom/squareup/wire/ProtoReader;)Ljava/lang/Void;
+	public synthetic fun encode (Lcom/squareup/wire/ProtoWriter;Ljava/lang/Object;)V
+	public fun encode (Lcom/squareup/wire/ProtoWriter;Ljava/lang/Void;)Ljava/lang/Void;
+	public synthetic fun encode (Lcom/squareup/wire/ReverseProtoWriter;Ljava/lang/Object;)V
+	public fun encode (Lcom/squareup/wire/ReverseProtoWriter;Ljava/lang/Void;)Ljava/lang/Void;
+	public synthetic fun encodedSize (Ljava/lang/Object;)I
+	public fun encodedSize (Ljava/lang/Void;)Ljava/lang/Void;
+	public synthetic fun redact (Ljava/lang/Object;)Ljava/lang/Object;
+	public fun redact (Ljava/lang/Void;)Ljava/lang/Void;
+}
+
+public final class com/squareup/wire/ProtoAdapter$EnumConstantNotFoundException : java/lang/IllegalArgumentException {
+	public final field value I
+	public fun <init> (ILjava/lang/Class;)V
+	public fun <init> (ILkotlin/reflect/KClass;)V
+}
+
+public class com/squareup/wire/ProtoReader {
+	public static final field Companion Lcom/squareup/wire/ProtoReader$Companion;
+	public final fun -forEachTag (Lkotlin/jvm/functions/Function1;)Lokio/ByteString;
+	public fun <init> (Lokio/BufferedSource;)V
+	public fun addUnknownField (ILcom/squareup/wire/FieldEncoding;Ljava/lang/Object;)V
+	public fun beginMessage ()J
+	public final fun endMessage (J)V
+	public fun endMessageAndGetUnknownFields (J)Lokio/ByteString;
+	public fun nextFieldMinLengthInBytes ()J
+	public fun nextLengthDelimited ()I
+	public fun nextTag ()I
+	public fun peekFieldEncoding ()Lcom/squareup/wire/FieldEncoding;
+	public fun readBytes ()Lokio/ByteString;
+	public fun readFixed32 ()I
+	public fun readFixed64 ()J
+	public fun readString ()Ljava/lang/String;
+	public fun readUnknownField (I)V
+	public fun readVarint32 ()I
+	public fun readVarint64 ()J
+	public fun skip ()V
+}
+
+public final class com/squareup/wire/ProtoReader$Companion {
+}
+
+public abstract interface class com/squareup/wire/ProtoReader32 {
+	public abstract fun addUnknownField (ILcom/squareup/wire/FieldEncoding;Ljava/lang/Object;)V
+	public abstract fun asProtoReader ()Lcom/squareup/wire/ProtoReader;
+	public abstract fun beforePossiblyPackedScalar ()Z
+	public abstract fun beginMessage ()I
+	public abstract fun endMessageAndGetUnknownFields (I)Lokio/ByteString;
+	public abstract fun nextFieldMinLengthInBytes ()I
+	public abstract fun nextLengthDelimited ()I
+	public abstract fun nextTag ()I
+	public abstract fun peekFieldEncoding ()Lcom/squareup/wire/FieldEncoding;
+	public abstract fun readBytes ()Lokio/ByteString;
+	public abstract fun readFixed32 ()I
+	public abstract fun readFixed64 ()J
+	public abstract fun readString ()Ljava/lang/String;
+	public abstract fun readUnknownField (I)V
+	public abstract fun readVarint32 ()I
+	public abstract fun readVarint64 ()J
+	public abstract fun skip ()V
+}
+
+public final class com/squareup/wire/ProtoReader32Kt {
+	public static final fun -forEachTag (Lcom/squareup/wire/ProtoReader32;Lkotlin/jvm/functions/Function1;)Lokio/ByteString;
+	public static final fun ProtoReader32 (Lokio/ByteString;II)Lcom/squareup/wire/ProtoReader32;
+	public static final fun ProtoReader32 ([BII)Lcom/squareup/wire/ProtoReader32;
+	public static synthetic fun ProtoReader32$default (Lokio/ByteString;IIILjava/lang/Object;)Lcom/squareup/wire/ProtoReader32;
+	public static synthetic fun ProtoReader32$default ([BIIILjava/lang/Object;)Lcom/squareup/wire/ProtoReader32;
+}
+
+public final class com/squareup/wire/ProtoWriter {
+	public static final field Companion Lcom/squareup/wire/ProtoWriter$Companion;
+	public fun <init> (Lokio/BufferedSink;)V
+	public final fun writeBytes (Lokio/ByteString;)V
+	public final fun writeFixed32 (I)V
+	public final fun writeFixed64 (J)V
+	public final fun writeString (Ljava/lang/String;)V
+	public final fun writeTag (ILcom/squareup/wire/FieldEncoding;)V
+	public final fun writeVarint32 (I)V
+	public final fun writeVarint64 (J)V
+}
+
+public final class com/squareup/wire/ProtoWriter$Companion {
+}
+
+public final class com/squareup/wire/ReverseProtoWriter {
+	public fun <init> ()V
+	public final fun getByteCount ()I
+	public final fun writeBytes (Lokio/ByteString;)V
+	public final fun writeFixed32 (I)V
+	public final fun writeFixed64 (J)V
+	public final fun writeString (Ljava/lang/String;)V
+	public final fun writeTag (ILcom/squareup/wire/FieldEncoding;)V
+	public final fun writeTo (Lokio/BufferedSink;)V
+	public final fun writeVarint32 (I)V
+	public final fun writeVarint64 (J)V
+}
+
+public final class com/squareup/wire/RuntimeEnumAdapter : com/squareup/wire/EnumAdapter {
+	public static final field Companion Lcom/squareup/wire/RuntimeEnumAdapter$Companion;
+	public fun <init> (Ljava/lang/Class;)V
+	public static final fun create (Ljava/lang/Class;)Lcom/squareup/wire/RuntimeEnumAdapter;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+}
+
+public final class com/squareup/wire/RuntimeEnumAdapter$Companion {
+	public final fun create (Ljava/lang/Class;)Lcom/squareup/wire/RuntimeEnumAdapter;
+}
+
+public abstract interface class com/squareup/wire/Service {
+}
+
+public final class com/squareup/wire/Syntax : java/lang/Enum {
+	public static final field Companion Lcom/squareup/wire/Syntax$Companion;
+	public static final field PROTO_2 Lcom/squareup/wire/Syntax;
+	public static final field PROTO_3 Lcom/squareup/wire/Syntax;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public fun toString ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/squareup/wire/Syntax;
+	public static fun values ()[Lcom/squareup/wire/Syntax;
+}
+
+public final class com/squareup/wire/Syntax$Companion {
+	public final fun get (Ljava/lang/String;)Lcom/squareup/wire/Syntax;
+}
+
+public final class com/squareup/wire/Wire {
+	public static final fun get (Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract interface annotation class com/squareup/wire/WireEnclosingType : java/lang/annotation/Annotation {
+}
+
+public abstract interface class com/squareup/wire/WireEnum {
+	public abstract fun getValue ()I
+}
+
+public abstract interface annotation class com/squareup/wire/WireEnumConstant : java/lang/annotation/Annotation {
+	public abstract fun declaredName ()Ljava/lang/String;
+}
+
+public abstract interface annotation class com/squareup/wire/WireField : java/lang/annotation/Annotation {
+	public abstract fun adapter ()Ljava/lang/String;
+	public abstract fun declaredName ()Ljava/lang/String;
+	public abstract fun jsonName ()Ljava/lang/String;
+	public abstract fun keyAdapter ()Ljava/lang/String;
+	public abstract fun label ()Lcom/squareup/wire/WireField$Label;
+	public abstract fun oneofName ()Ljava/lang/String;
+	public abstract fun redacted ()Z
+	public abstract fun schemaIndex ()I
+	public abstract fun tag ()I
+}
+
+public final class com/squareup/wire/WireField$Label : java/lang/Enum {
+	public static final field OMIT_IDENTITY Lcom/squareup/wire/WireField$Label;
+	public static final field ONE_OF Lcom/squareup/wire/WireField$Label;
+	public static final field OPTIONAL Lcom/squareup/wire/WireField$Label;
+	public static final field PACKED Lcom/squareup/wire/WireField$Label;
+	public static final field REPEATED Lcom/squareup/wire/WireField$Label;
+	public static final field REQUIRED Lcom/squareup/wire/WireField$Label;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun isOneOf ()Z
+	public final fun isPacked ()Z
+	public final fun isRepeated ()Z
+	public static fun valueOf (Ljava/lang/String;)Lcom/squareup/wire/WireField$Label;
+	public static fun values ()[Lcom/squareup/wire/WireField$Label;
+}
+
+public abstract interface annotation class com/squareup/wire/WireRpc : java/lang/annotation/Annotation {
+	public abstract fun path ()Ljava/lang/String;
+	public abstract fun requestAdapter ()Ljava/lang/String;
+	public abstract fun responseAdapter ()Ljava/lang/String;
+	public abstract fun sourceFile ()Ljava/lang/String;
+}
+
+public final class com/squareup/wire/internal/DoubleArrayList {
+	public static final field Companion Lcom/squareup/wire/internal/DoubleArrayList$Companion;
+	public fun <init> (I)V
+	public final fun add (D)V
+	public final fun isNotEmpty ()Z
+	public final fun toArray ()[D
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/wire/internal/DoubleArrayList$Companion {
+	public final fun forDecoding (II)Lcom/squareup/wire/internal/DoubleArrayList;
+	public final fun forDecoding (JJ)Lcom/squareup/wire/internal/DoubleArrayList;
+}
+
+public final class com/squareup/wire/internal/DurationJsonFormatter : com/squareup/wire/internal/JsonFormatter {
+	public static final field INSTANCE Lcom/squareup/wire/internal/DurationJsonFormatter;
+	public synthetic fun fromString (Ljava/lang/String;)Ljava/lang/Object;
+	public fun fromString (Ljava/lang/String;)Ljava/time/Duration;
+	public synthetic fun toStringOrNumber (Ljava/lang/Object;)Ljava/lang/Object;
+	public fun toStringOrNumber (Ljava/time/Duration;)Ljava/lang/String;
+}
+
+public final class com/squareup/wire/internal/EnumJsonFormatter : com/squareup/wire/internal/JsonFormatter {
+	public fun <init> (Lcom/squareup/wire/EnumAdapter;)V
+	public fun fromString (Ljava/lang/String;)Lcom/squareup/wire/WireEnum;
+	public synthetic fun fromString (Ljava/lang/String;)Ljava/lang/Object;
+	public fun toStringOrNumber (Lcom/squareup/wire/WireEnum;)Ljava/lang/Object;
+	public synthetic fun toStringOrNumber (Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class com/squareup/wire/internal/FieldBinding : com/squareup/wire/internal/FieldOrOneOfBinding {
+	public static final field Companion Lcom/squareup/wire/internal/FieldBinding$Companion;
+	public fun get (Lcom/squareup/wire/Message;)Ljava/lang/Object;
+	public synthetic fun get (Ljava/lang/Object;)Ljava/lang/Object;
+	public fun getDeclaredName ()Ljava/lang/String;
+	public fun getFromBuilder (Lcom/squareup/wire/Message$Builder;)Ljava/lang/Object;
+	public synthetic fun getFromBuilder (Ljava/lang/Object;)Ljava/lang/Object;
+	public fun getKeyAdapter ()Lcom/squareup/wire/ProtoAdapter;
+	public fun getLabel ()Lcom/squareup/wire/WireField$Label;
+	public fun getName ()Ljava/lang/String;
+	public fun getRedacted ()Z
+	public fun getSingleAdapter ()Lcom/squareup/wire/ProtoAdapter;
+	public fun getTag ()I
+	public fun getWireFieldJsonName ()Ljava/lang/String;
+	public fun getWriteIdentityValues ()Z
+	public fun isMap ()Z
+	public fun isMessage ()Z
+	public fun set (Lcom/squareup/wire/Message$Builder;Ljava/lang/Object;)V
+	public synthetic fun set (Ljava/lang/Object;Ljava/lang/Object;)V
+	public fun value (Lcom/squareup/wire/Message$Builder;Ljava/lang/Object;)V
+	public synthetic fun value (Ljava/lang/Object;Ljava/lang/Object;)V
+}
+
+public final class com/squareup/wire/internal/FieldBinding$Companion {
+}
+
+public abstract class com/squareup/wire/internal/FieldOrOneOfBinding {
+	public fun <init> ()V
+	public abstract fun get (Ljava/lang/Object;)Ljava/lang/Object;
+	public final fun getAdapter ()Lcom/squareup/wire/ProtoAdapter;
+	public abstract fun getDeclaredName ()Ljava/lang/String;
+	public abstract fun getFromBuilder (Ljava/lang/Object;)Ljava/lang/Object;
+	public abstract fun getKeyAdapter ()Lcom/squareup/wire/ProtoAdapter;
+	public abstract fun getLabel ()Lcom/squareup/wire/WireField$Label;
+	public abstract fun getName ()Ljava/lang/String;
+	public abstract fun getRedacted ()Z
+	public abstract fun getSingleAdapter ()Lcom/squareup/wire/ProtoAdapter;
+	public abstract fun getTag ()I
+	public abstract fun getWireFieldJsonName ()Ljava/lang/String;
+	public abstract fun getWriteIdentityValues ()Z
+	public abstract fun isMap ()Z
+	public abstract fun isMessage ()Z
+	public final fun omitFromJson (Lcom/squareup/wire/Syntax;Ljava/lang/Object;)Z
+	public abstract fun set (Ljava/lang/Object;Ljava/lang/Object;)V
+	public abstract fun value (Ljava/lang/Object;Ljava/lang/Object;)V
+}
+
+public final class com/squareup/wire/internal/FloatArrayList {
+	public static final field Companion Lcom/squareup/wire/internal/FloatArrayList$Companion;
+	public fun <init> (I)V
+	public final fun add (F)V
+	public final fun isNotEmpty ()Z
+	public final fun toArray ()[F
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/wire/internal/FloatArrayList$Companion {
+	public final fun forDecoding (II)Lcom/squareup/wire/internal/FloatArrayList;
+	public final fun forDecoding (JJ)Lcom/squareup/wire/internal/FloatArrayList;
+}
+
+public final class com/squareup/wire/internal/InstantJsonFormatter : com/squareup/wire/internal/JsonFormatter {
+	public static final field INSTANCE Lcom/squareup/wire/internal/InstantJsonFormatter;
+	public synthetic fun fromString (Ljava/lang/String;)Ljava/lang/Object;
+	public fun fromString (Ljava/lang/String;)Ljava/time/Instant;
+	public synthetic fun toStringOrNumber (Ljava/lang/Object;)Ljava/lang/Object;
+	public fun toStringOrNumber (Ljava/time/Instant;)Ljava/lang/Object;
+}
+
+public final class com/squareup/wire/internal/IntArrayList {
+	public static final field Companion Lcom/squareup/wire/internal/IntArrayList$Companion;
+	public fun <init> (I)V
+	public final fun add (I)V
+	public final fun isNotEmpty ()Z
+	public final fun toArray ()[I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/wire/internal/IntArrayList$Companion {
+	public final fun forDecoding (II)Lcom/squareup/wire/internal/IntArrayList;
+	public final fun forDecoding (JJ)Lcom/squareup/wire/internal/IntArrayList;
+}
+
+public final class com/squareup/wire/internal/Internal {
+	public static final fun -redactElements (Ljava/util/List;Lcom/squareup/wire/ProtoAdapter;)Ljava/util/List;
+	public static final fun -redactElements (Ljava/util/Map;Lcom/squareup/wire/ProtoAdapter;)Ljava/util/Map;
+	public static final fun boxedOneOfClassName (Ljava/lang/String;)Ljava/lang/String;
+	public static final fun boxedOneOfKeyFieldName (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public static final fun boxedOneOfKeysFieldName (Ljava/lang/String;)Ljava/lang/String;
+	public static final fun checkElementsNotNull (Ljava/util/List;)V
+	public static final fun checkElementsNotNull (Ljava/util/Map;)V
+	public static final fun copyOf (Ljava/lang/String;Ljava/util/List;)Ljava/util/List;
+	public static final fun copyOf (Ljava/lang/String;Ljava/util/Map;)Ljava/util/Map;
+	public static final fun copyOf (Ljava/util/List;)Ljava/util/List;
+	public static final fun copyOf (Ljava/util/Map;)Ljava/util/Map;
+	public static final fun countNonNull (Ljava/lang/Object;Ljava/lang/Object;)I
+	public static final fun countNonNull (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)I
+	public static final fun countNonNull (Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;[Ljava/lang/Object;)I
+	public static final fun decodePrimitive_double (Lcom/squareup/wire/ProtoReader32;)D
+	public static final fun decodePrimitive_double (Lcom/squareup/wire/ProtoReader;)D
+	public static final fun decodePrimitive_fixed32 (Lcom/squareup/wire/ProtoReader32;)I
+	public static final fun decodePrimitive_fixed32 (Lcom/squareup/wire/ProtoReader;)I
+	public static final fun decodePrimitive_fixed64 (Lcom/squareup/wire/ProtoReader32;)J
+	public static final fun decodePrimitive_fixed64 (Lcom/squareup/wire/ProtoReader;)J
+	public static final fun decodePrimitive_float (Lcom/squareup/wire/ProtoReader32;)F
+	public static final fun decodePrimitive_float (Lcom/squareup/wire/ProtoReader;)F
+	public static final fun decodePrimitive_int32 (Lcom/squareup/wire/ProtoReader32;)I
+	public static final fun decodePrimitive_int32 (Lcom/squareup/wire/ProtoReader;)I
+	public static final fun decodePrimitive_int64 (Lcom/squareup/wire/ProtoReader32;)J
+	public static final fun decodePrimitive_int64 (Lcom/squareup/wire/ProtoReader;)J
+	public static final fun decodePrimitive_sfixed32 (Lcom/squareup/wire/ProtoReader32;)I
+	public static final fun decodePrimitive_sfixed32 (Lcom/squareup/wire/ProtoReader;)I
+	public static final fun decodePrimitive_sfixed64 (Lcom/squareup/wire/ProtoReader32;)J
+	public static final fun decodePrimitive_sfixed64 (Lcom/squareup/wire/ProtoReader;)J
+	public static final fun decodePrimitive_sint32 (Lcom/squareup/wire/ProtoReader32;)I
+	public static final fun decodePrimitive_sint32 (Lcom/squareup/wire/ProtoReader;)I
+	public static final fun decodePrimitive_sint64 (Lcom/squareup/wire/ProtoReader32;)J
+	public static final fun decodePrimitive_sint64 (Lcom/squareup/wire/ProtoReader;)J
+	public static final fun decodePrimitive_uint32 (Lcom/squareup/wire/ProtoReader32;)I
+	public static final fun decodePrimitive_uint32 (Lcom/squareup/wire/ProtoReader;)I
+	public static final fun decodePrimitive_uint64 (Lcom/squareup/wire/ProtoReader32;)J
+	public static final fun decodePrimitive_uint64 (Lcom/squareup/wire/ProtoReader;)J
+	public static final fun encodeArray_double ([DLcom/squareup/wire/ReverseProtoWriter;I)V
+	public static final fun encodeArray_fixed32 ([ILcom/squareup/wire/ReverseProtoWriter;I)V
+	public static final fun encodeArray_fixed64 ([JLcom/squareup/wire/ReverseProtoWriter;I)V
+	public static final fun encodeArray_float ([FLcom/squareup/wire/ReverseProtoWriter;I)V
+	public static final fun encodeArray_int32 ([ILcom/squareup/wire/ReverseProtoWriter;I)V
+	public static final fun encodeArray_int64 ([JLcom/squareup/wire/ReverseProtoWriter;I)V
+	public static final fun encodeArray_sfixed32 ([ILcom/squareup/wire/ReverseProtoWriter;I)V
+	public static final fun encodeArray_sfixed64 ([JLcom/squareup/wire/ReverseProtoWriter;I)V
+	public static final fun encodeArray_sint32 ([ILcom/squareup/wire/ReverseProtoWriter;I)V
+	public static final fun encodeArray_sint64 ([JLcom/squareup/wire/ReverseProtoWriter;I)V
+	public static final fun encodeArray_uint32 ([ILcom/squareup/wire/ReverseProtoWriter;I)V
+	public static final fun encodeArray_uint64 ([JLcom/squareup/wire/ReverseProtoWriter;I)V
+	public static final fun equals (Ljava/lang/Object;Ljava/lang/Object;)Z
+	public static final fun getIdentityOrNull (Ljava/lang/Class;)Lcom/squareup/wire/WireEnum;
+	public static final fun immutableCopyOf (Ljava/lang/String;Ljava/util/List;)Ljava/util/List;
+	public static final fun immutableCopyOf (Ljava/lang/String;Ljava/util/Map;)Ljava/util/Map;
+	public static final fun immutableCopyOfMapWithStructValues (Ljava/lang/String;Ljava/util/Map;)Ljava/util/Map;
+	public static final fun immutableCopyOfStruct (Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;
+	public static final fun missingRequiredFields ([Ljava/lang/Object;)Ljava/lang/IllegalStateException;
+	public static final fun newMutableList ()Ljava/util/List;
+	public static final fun newMutableMap ()Ljava/util/Map;
+	public static final fun redactElements (Ljava/util/List;Lcom/squareup/wire/ProtoAdapter;)V
+	public static final fun redactElements (Ljava/util/Map;Lcom/squareup/wire/ProtoAdapter;)V
+	public static final fun sanitize (Ljava/lang/String;)Ljava/lang/String;
+	public static final fun sanitize (Ljava/util/List;)Ljava/lang/String;
+}
+
+public abstract interface class com/squareup/wire/internal/JsonFormatter {
+	public abstract fun fromString (Ljava/lang/String;)Ljava/lang/Object;
+	public abstract fun toStringOrNumber (Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+public abstract class com/squareup/wire/internal/JsonIntegration {
+	public fun <init> ()V
+	public abstract fun formatterAdapter (Lcom/squareup/wire/internal/JsonFormatter;)Ljava/lang/Object;
+	public abstract fun frameworkAdapter (Ljava/lang/Object;Ljava/lang/reflect/Type;)Ljava/lang/Object;
+	public final fun jsonAdapters (Lcom/squareup/wire/internal/RuntimeMessageAdapter;Ljava/lang/Object;)Ljava/util/List;
+	public abstract fun listAdapter (Ljava/lang/Object;)Ljava/lang/Object;
+	public abstract fun mapAdapter (Ljava/lang/Object;Lcom/squareup/wire/internal/JsonFormatter;Ljava/lang/Object;)Ljava/lang/Object;
+	public abstract fun structAdapter (Ljava/lang/Object;)Ljava/lang/Object;
+}
+
+public final class com/squareup/wire/internal/LongArrayList {
+	public static final field Companion Lcom/squareup/wire/internal/LongArrayList$Companion;
+	public fun <init> (I)V
+	public final fun add (J)V
+	public final fun isNotEmpty ()Z
+	public final fun toArray ()[J
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/squareup/wire/internal/LongArrayList$Companion {
+	public final fun forDecoding (II)Lcom/squareup/wire/internal/LongArrayList;
+	public final fun forDecoding (JJ)Lcom/squareup/wire/internal/LongArrayList;
+}
+
+public abstract interface class com/squareup/wire/internal/MessageBinding {
+	public abstract fun addUnknownField (Ljava/lang/Object;ILcom/squareup/wire/FieldEncoding;Ljava/lang/Object;)V
+	public abstract fun build (Ljava/lang/Object;)Ljava/lang/Object;
+	public abstract fun clearUnknownFields (Ljava/lang/Object;)V
+	public abstract fun getCachedSerializedSize (Ljava/lang/Object;)I
+	public abstract fun getFields ()Ljava/util/Map;
+	public abstract fun getMessageType ()Lkotlin/reflect/KClass;
+	public abstract fun getSyntax ()Lcom/squareup/wire/Syntax;
+	public abstract fun getTypeUrl ()Ljava/lang/String;
+	public abstract fun newBuilder ()Ljava/lang/Object;
+	public abstract fun setCachedSerializedSize (Ljava/lang/Object;I)V
+	public abstract fun unknownFields (Ljava/lang/Object;)Lokio/ByteString;
+}
+
+public final class com/squareup/wire/internal/ReflectionKt {
+	public static final fun createRuntimeMessageAdapter (Ljava/lang/Class;Ljava/lang/String;Lcom/squareup/wire/Syntax;Ljava/lang/ClassLoader;Z)Lcom/squareup/wire/internal/RuntimeMessageAdapter;
+	public static final fun createRuntimeMessageAdapter (Ljava/lang/Class;ZLjava/lang/ClassLoader;)Lcom/squareup/wire/internal/RuntimeMessageAdapter;
+	public static synthetic fun createRuntimeMessageAdapter$default (Ljava/lang/Class;Ljava/lang/String;Lcom/squareup/wire/Syntax;Ljava/lang/ClassLoader;ZILjava/lang/Object;)Lcom/squareup/wire/internal/RuntimeMessageAdapter;
+	public static synthetic fun createRuntimeMessageAdapter$default (Ljava/lang/Class;ZLjava/lang/ClassLoader;ILjava/lang/Object;)Lcom/squareup/wire/internal/RuntimeMessageAdapter;
+}
+
+public final class com/squareup/wire/internal/RuntimeMessageAdapter : com/squareup/wire/ProtoAdapter {
+	public static final field Companion Lcom/squareup/wire/internal/RuntimeMessageAdapter$Companion;
+	public fun <init> (Lcom/squareup/wire/internal/MessageBinding;)V
+	public fun decode (Lcom/squareup/wire/ProtoReader;)Ljava/lang/Object;
+	public fun encode (Lcom/squareup/wire/ProtoWriter;Ljava/lang/Object;)V
+	public fun encode (Lcom/squareup/wire/ReverseProtoWriter;Ljava/lang/Object;)V
+	public fun encodedSize (Ljava/lang/Object;)I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFieldBindingsArray ()[Lcom/squareup/wire/internal/FieldOrOneOfBinding;
+	public final fun getFields ()Ljava/util/Map;
+	public final fun getJsonAlternateNames ()Ljava/util/List;
+	public final fun getJsonName (Lcom/squareup/wire/internal/FieldOrOneOfBinding;)Ljava/lang/String;
+	public final fun getJsonNames ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun newBuilder ()Ljava/lang/Object;
+	public fun redact (Ljava/lang/Object;)Ljava/lang/Object;
+	public fun toString (Ljava/lang/Object;)Ljava/lang/String;
+	public final fun writeAllFields (Ljava/lang/Object;Ljava/util/List;Ljava/lang/Object;Lkotlin/jvm/functions/Function3;)V
+}
+
+public final class com/squareup/wire/internal/RuntimeMessageAdapter$Companion {
+}
+
+public final class com/squareup/wire/internal/_PlatformKt {
+	public static final fun camelCase (Ljava/lang/String;Z)Ljava/lang/String;
+	public static synthetic fun camelCase$default (Ljava/lang/String;ZILjava/lang/Object;)Ljava/lang/String;
+	public static final fun toUnmodifiableList (Ljava/util/List;)Ljava/util/List;
+	public static final fun toUnmodifiableMap (Ljava/util/Map;)Ljava/util/Map;
+}
+

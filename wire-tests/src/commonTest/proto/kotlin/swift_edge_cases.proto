@@ -1,0 +1,46 @@
+/*
+ * Copyright 2023 Square Inc.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+syntax = "proto2";
+
+package squareup.protos.kotlin.swift_modules;
+
+message SwiftEdgeCases {
+  enum Error {
+    UNKNOWN = 0;
+    INNER_BAD_VALUE = 1;
+  }
+
+  enum Type {
+    INACTIVE = 0;
+    ACTIVE = 1;
+  }
+
+  optional string return = 1;
+  optional Error error = 2;
+  optional Type type = 3;
+}
+
+message Screen {
+  oneof screen {
+    string oneof_string = 1;
+    int32 oneof_int32 = 2;
+  }
+}
+
+enum Error {
+  UNKNOWN = 0;
+  BAD_VALUE = 1;
+}
